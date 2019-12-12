@@ -1,0 +1,76 @@
+------ DATAFRAME
+> Importar pyspark.sql
+from pyspark.sql import SQLContext 
+
+> Criar Conexao
+conn = SQLContext(sc)
+
+> Ler arquivo JSON
+df = conn.read.json("file:/home/cloudera/pessoas.json")
+
+> Verificar o tipo de variavel
+type(df)
+df
+
+> Ver o help, para sair, apertar Q
+help(df)
+
+> Estrutura
+df.printSchema()
+
+> Exibir resultados
+df.first()
+df.Show()
+df.show(5)
+
+> Fazer select no dataframe e criar um novo dataframe com base no anterior
+df.select("name").show()
+df_name = df.select("name")
+df_name.show()
+
+> Fazer filtro no dataframe
+df_jovem = df.filter(dt["age"]<30)
+df_jovem.show()
+
+> Comando para criar estudos no campo age
+df.describe("age").show()
+
+> Group by e salvar no cache
+df.groupby("age").count().show()
+df2 = df.groupby("age").count()
+df2.cache()
+df2.show()
+
+> Salvar arquivos
+df.write.json("/aula/spark/json")
+df.write.parquet("/aula/spark/parquet")
+
+> Ler arquivo parquet
+df_p = conn.read.parquet("/aula/spark/parquet")
+df_p.show()
+
+----- Criar tabela para poder fazer sql
+> Para poder o spark conectar no hive, precisa criar o arquivo de configuração
+sudo cp /etc/hive/conf/hive-site.xml /etc/spark/conf
+
+conn = HiveContext(sc)
+df = conn.read.parquet("/aula/spark/parquet")
+df.registerTempTable("tab")
+
+conn.sql("select * from tab").show()
+conn.sql("select age, count(age) from tab group by age").show()
+
+	conn.sql("show databases").show()
+conn.sql("show tables in aula").show()
+
+---------Salvar no HIVE----------
+df.write.mode("overwrite").format("parquet").saveAsTable("default.teste")
+df_hive = conn.sql("select * from default.teste")
+df_hive.show()
+
+
+
+
+
+
+
